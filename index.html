@@ -54,7 +54,7 @@
             transition: 0.3s;
         }
         button:hover { opacity: 0.9; transform: scale(1.02); }
-        #result { margin-top: 25px; }
+        #result { margin-top: 25px; word-wrap: break-word; }
         .btn-download {
             background: #0095f6; 
             color: white; 
@@ -65,13 +65,14 @@
             font-weight: bold;
             margin-top: 10px;
         }
+        .error-msg { color: red; font-size: 13px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>TikGram ID</h2>
-    <p class="subtitle">Instagram Downloader</p>
+    <p class="subtitle">Instagram Downloader V2</p>
     <br>
     <input type="text" id="urlInput" placeholder="Tempel Link Instagram..." />
     <button onclick="downloadInstagram()">Download</button>
@@ -87,11 +88,14 @@
             alert("Harap masukkan link Instagram dulu!");
             return;
         }
-        resultDiv.innerHTML = "Sedang mencari...";
+        resultDiv.innerHTML = "Sedang mencari... (Tunggu sebentar)";
 
         // API Key Anda
         const apiKey = '7a8d839d0dmsh5e778a7aecdf8aep1e7922jsnca9a2ba4b602'; 
         
+        // PERBAIKAN 1: Menggunakan encodeURIComponent supaya link aman
+        const encodedUrl = encodeURIComponent(inputUrl);
+
         const options = {
             method: 'GET',
             headers: {
@@ -101,25 +105,42 @@
         };
 
         try {
-            const response = await fetch(`https://instagram-downloader-scraper-reels-igtv-posts-stories.p.rapidapi.com/v1/url?url=${inputUrl}`, options);
+            // Menggunakan Endpoint V1
+            const response = await fetch(`https://instagram-downloader-scraper-reels-igtv-posts-stories.p.rapidapi.com/v1/url?url=${encodedUrl}`, options);
             const data = await response.json();
             
+            console.log(data); // Untuk cek di console developer
+
+            // PERBAIKAN 2: Mencari video di berbagai kemungkinan tempat
             let videoUrl = "";
-            if (data.media && data.media.length > 0) videoUrl = data.media[0].url;
-            else if (data.url) videoUrl = data.url;
-            else if (data.links && data.links.length > 0) videoUrl = data.links[0].url;
+            
+            if (data.media && data.media.length > 0) {
+                 videoUrl = data.media[0].url;
+            } else if (data.url) {
+                 videoUrl = data.url; 
+            } else if (data.links && data.links.length > 0) {
+                 videoUrl = data.links[0].url;
+            } else if (Array.isArray(data) && data[0].url) {
+                 videoUrl = data[0].url;
+            }
 
             if(videoUrl) {
                 resultDiv.innerHTML = `
-                    <p style="color:green; font-weight:bold;">Video Ketemu!</p>
+                    <p style="color:green; font-weight:bold;">Video Ditemukan!</p>
                     <a href="${videoUrl}" target="_blank" class="btn-download">Download MP4</a>
                 `;
             } else {
-                resultDiv.innerHTML = "Gagal. Pastikan akun tidak diprivate.";
+                // Tampilkan pesan error asli jika ada, biar kita tahu salahnya dimana
+                let pesanError = "Gagal. ";
+                if(data.message) pesanError += data.message;
+                else pesanError += "Pastikan akun Publik (tidak dikunci).";
+                
+                resultDiv.innerHTML = `<p class="error-msg">${pesanError}</p>`;
             }
+
         } catch (error) {
             console.error(error);
-            resultDiv.innerHTML = "Error sistem.";
+            resultDiv.innerHTML = `<p class="error-msg">Error Jaringan: ${error.message}</p>`;
         }
     }
 </script>
