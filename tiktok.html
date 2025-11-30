@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikGram ID - Download TikTok</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
+        .container { background: #111; padding: 2.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(255,255,255,0.1); width: 100%; max-width: 400px; text-align: center; border: 1px solid #333; }
+        h2 { color: #fff; margin-bottom: 5px; }
+        span.tiktok-color { color: #fe2c55; text-shadow: 2px 2px 0px #25f4ee; }
+        p.subtitle { color: #888; margin-top: 0; font-size: 14px; }
+        input { width: 90%; padding: 14px; margin-bottom: 20px; border: 1px solid #333; border-radius: 12px; font-size: 14px; background-color: #222; color: white; }
+        button { width: 100%; padding: 14px; background-color: #fe2c55; color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #e6254c; }
+        #result { margin-top: 25px; word-wrap: break-word; }
+        .btn-download { background: #25f4ee; color: black; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; margin-top: 10px; }
+        .home-btn { display: block; margin-bottom: 20px; text-decoration: none; color: #fff; font-weight: bold; font-size: 14px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="index.html" class="home-btn">⬅ Kembali ke Menu Utama</a>
+    <h2>TikGram <span class="tiktok-color">ID</span></h2>
+    <p class="subtitle">TikTok Downloader No Watermark</p>
+    <br>
+    <input type="text" id="urlInput" placeholder="Tempel Link TikTok..." />
+    <button onclick="downloadTikTok()">Download</button>
+    <div id="result"></div>
+</div>
+<script>
+    async function downloadTikTok() {
+        const inputUrl = document.getElementById('urlInput').value;
+        const resultDiv = document.getElementById('result');
+        if (!inputUrl) { alert("Harap masukkan link TikTok dulu!"); return; }
+        resultDiv.innerHTML = "Sedang mencari...";
+        const apiKey = '7a8d839d0dmsh5e778a7aecdf8aep1e7922jsnca9a2ba4b602'; 
+        try {
+            const response = await fetch(`https://tiktok-video-no-watermark2.p.rapidapi.com/?url=${inputUrl}&hd=1`, {
+                method: 'GET', headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'tiktok-video-no-watermark2.p.rapidapi.com' }
+            });
+            const data = await response.json();
+            if(data.data && data.data.play) { resultDiv.innerHTML = `<p style="color:#25f4ee; font-weight:bold;">Video Ditemukan!</p><a href="${data.data.play}" target="_blank" class="btn-download">Download MP4</a>`; }
+            else { resultDiv.innerHTML = `<p style="color:red;">Gagal. Link salah atau diprivate.</p>`; }
+        } catch (error) { resultDiv.innerHTML = `<p style="color:red;">Error sistem.</p>`; }
+    }
+</script>
+</body>
+</html>
