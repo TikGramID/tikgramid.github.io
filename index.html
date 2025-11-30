@@ -3,131 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikGram ID - Download IG</title>
+    <title>TikGram ID - Home</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #fafafa;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            padding: 20px;
         }
-        .container {
+        .card {
             background: white;
-            padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
+            padding: 3rem;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             text-align: center;
-            border: 1px solid #dbdbdb;
-        }
-        h2 { 
-            background: -webkit-linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-        p.subtitle { color: #8e8e8e; margin-top: 0; font-size: 14px; }
-        input {
-            width: 90%;
-            padding: 14px;
-            margin-bottom: 20px;
-            border: 1px solid #dbdbdb;
-            border-radius: 12px;
-            font-size: 14px;
-            background-color: #fafafa;
-        }
-        button {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            max-width: 350px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 32px;
+            font-weight: 800;
+        }
+        p { color: #666; margin-top: 0; margin-bottom: 30px; }
+        
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 0;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
             color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
+            box-sizing: border-box; 
         }
-        button:hover { opacity: 0.9; transform: scale(1.02); }
-        #result { margin-top: 25px; word-wrap: break-word; }
-        .btn-download {
-            background: #0095f6; 
-            color: white; 
-            padding: 12px 25px; 
-            text-decoration: none; 
-            border-radius: 8px;
-            display: inline-block;
-            font-weight: bold;
-            margin-top: 10px;
+        
+        .menu-btn:active { transform: scale(0.95); }
+
+        .btn-tiktok {
+            background: linear-gradient(90deg, #000000 0%, #111111 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .error-msg { color: red; font-size: 13px; margin-top: 10px; }
+        
+        .btn-ig {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3);
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>TikGram ID</h2>
-    <p class="subtitle">Instagram Downloader</p>
-    <br>
-    <input type="text" id="urlInput" placeholder="Tempel Link Instagram..." />
-    <button onclick="downloadInstagram()">Download</button>
-    <div id="result"></div>
-</div>
+    <div class="card">
+        <h1>TikGram ID</h1>
+        <p>Pilih layanan download:</p>
 
-<script>
-    async function downloadInstagram() {
-        const inputUrl = document.getElementById('urlInput').value;
-        const resultDiv = document.getElementById('result');
-        
-        if (!inputUrl) {
-            alert("Harap masukkan link Instagram dulu!");
-            return;
-        }
-        resultDiv.innerHTML = "Sedang mencari... (Tunggu sebentar)";
+        <a href="tiktok.html" class="menu-btn btn-tiktok">
+            🎵 Download TikTok
+        </a>
 
-        const apiKey = '7a8d839d0dmsh5e778a7aecdf8aep1e7922jsnca9a2ba4b602'; 
-        const encodedUrl = encodeURIComponent(inputUrl);
+        <a href="instagram.html" class="menu-btn btn-ig">
+            📸 Download Instagram
+        </a>
 
-        const options = {
-            method: 'GET',
-            headers: {
-                'x-rapidapi-key': apiKey,
-                'x-rapidapi-host': 'instagram-downloader-scraper-reels-igtv-posts-stories.p.rapidapi.com'
-            }
-        };
-
-        try {
-            const response = await fetch(`https://instagram-downloader-scraper-reels-igtv-posts-stories.p.rapidapi.com/scraper?url=${encodedUrl}`, options);
-            const responseData = await response.json();
-            
-            // LOGIKA BARU (Berdasarkan Hasil Rontgen Tadi):
-            // Server menyimpan video di: data -> [0] -> media
-            let videoUrl = "";
-
-            if (responseData.data && Array.isArray(responseData.data) && responseData.data.length > 0) {
-                videoUrl = responseData.data[0].media;
-            }
-
-            if(videoUrl) {
-                resultDiv.innerHTML = `
-                    <p style="color:green; font-weight:bold;">Video Berhasil Ditemukan!</p>
-                    <a href="${videoUrl}" target="_blank" class="btn-download">Download MP4</a>
-                `;
-            } else {
-                resultDiv.innerHTML = `<p class="error-msg">Gagal. Link video tidak ditemukan di server.</p>`;
-            }
-
-        } catch (error) {
-            console.error(error);
-            resultDiv.innerHTML = `<p class="error-msg">Error: ${error.message}</p>`;
-        }
-    }
-</script>
+        <div class="footer">
+            &copy; 2025 TikGram ID
+        </div>
+    </div>
 
 </body>
 </html>
