@@ -22,10 +22,10 @@
 <div class="container">
     <a href="index.html" class="home-btn">⬅ Kembali ke Menu Utama</a>
     <h2>TikGram <span class="tiktok-color">ID</span></h2>
-    <p class="subtitle">TikTok Downloader No Watermark</p>
+    <p class="subtitle">TikTok Auto Downloader</p>
     <br>
     <input type="text" id="urlInput" placeholder="Tempel Link TikTok..." />
-    <button onclick="downloadTikTok()">Download</button>
+    <button onclick="downloadTikTok()">Download Otomatis</button>
     <div id="result"></div>
 </div>
 <script>
@@ -40,8 +40,16 @@
                 method: 'GET', headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'tiktok-video-no-watermark2.p.rapidapi.com' }
             });
             const data = await response.json();
-            if(data.data && data.data.play) { resultDiv.innerHTML = `<p style="color:#25f4ee; font-weight:bold;">Video Ditemukan!</p><a href="${data.data.play}" target="_blank" class="btn-download">Download MP4</a>`; }
-            else { resultDiv.innerHTML = `<p style="color:red;">Gagal. Link salah atau diprivate.</p>`; }
+            if(data.data && data.data.play) { 
+                const videoUrl = data.data.play;
+                
+                // --- FITUR AUTO DOWNLOAD ---
+                resultDiv.innerHTML = `<p style="color:#25f4ee;">Video Ditemukan! Membuka otomatis...</p><a href="${videoUrl}" target="_blank" class="btn-download">Klik jika tidak terbuka</a>`;
+                
+                // Perintah membuka link otomatis
+                setTimeout(() => { window.location.href = videoUrl; }, 1000); 
+                
+            } else { resultDiv.innerHTML = `<p style="color:red;">Gagal. Link salah atau diprivate.</p>`; }
         } catch (error) { resultDiv.innerHTML = `<p style="color:red;">Error sistem.</p>`; }
     }
 </script>
