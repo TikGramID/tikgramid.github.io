@@ -3,33 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cek Story IG</title>
+    <title>TikGram ID - IG Downloader</title>
     <style>
-        body { font-family: monospace; padding: 20px; background: #222; color: #0f0; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; }
-        button { width: 100%; padding: 10px; font-weight: bold; cursor: pointer; }
-        #debug { white-space: pre-wrap; word-break: break-word; background: #000; padding: 10px; border: 1px solid #0f0; margin-top: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #fafafa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; border: 1px solid #dbdbdb; }
+        h2 { background: -webkit-linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px; margin-bottom: 5px; }
+        input { width: 90%; padding: 14px; margin-bottom: 20px; border: 1px solid #dbdbdb; border-radius: 12px; font-size: 14px; background-color: #fafafa; }
+        button { width: 100%; padding: 14px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        
+        /* Area Hasil (Story List) */
+        #result { margin-top: 25px; text-align: left; }
+        
+        .story-item {
+            background: #f8f8f8;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .story-thumb {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+        
+        .btn-dl-mini {
+            background: #0095f6;
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .home-btn { display: block; margin-bottom: 20px; text-decoration: none; color: #333; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
-    <h3>MODE DETEKTIF STORY</h3>
-    <input type="text" id="urlInput" placeholder="Tempel Link Story Disini..." />
-    <button onclick="cekStory()">CEK DATA STORY</button>
-    <div id="debug">Hasil rontgen akan muncul di sini...</div>
+
+<div class="container">
+    <a href="index.html" class="home-btn">⬅ Kembali ke Menu Utama</a>
+    <h2>TikGram ID</h2>
+    <p style="color:#888; font-size:14px;">Download Reels & Story</p>
+    <br>
+    <input type="text" id="urlInput" placeholder="Tempel Link Instagram..." />
+    <button onclick="downloadInstagram()">Download</button>
+    <div id="result"></div>
+</div>
 
 <script>
-    async function cekStory() {
+    async function downloadInstagram() {
         const inputUrl = document.getElementById('urlInput').value;
-        const debugDiv = document.getElementById('debug');
-        debugDiv.innerHTML = "Sedang menyelidiki...";
-
+        const resultDiv = document.getElementById('result');
+        
+        if (!inputUrl) { alert("Harap masukkan link Instagram dulu!"); return; }
+        resultDiv.innerHTML = "<p style='text-align:center;'>Sedang mencari... (Tunggu sebentar)</p>";
+        
         const apiKey = '7a8d839d0dmsh5e778a7aecdf8aep1e7922jsnca9a2ba4b602'; 
         const encodedUrl = encodeURIComponent(inputUrl);
-
+        
         try {
-            // Kita coba pakai endpoint yang sama dulu
             const response = await fetch(`https://instagram-downloader-scraper-reels-igtv-posts-stories.p.rapidapi.com/scraper?url=${encodedUrl}`, {
-                method: 'GET',
+                method: 'GET', 
                 headers: { 
                     'x-rapidapi-key': apiKey, 
                     'x-rapidapi-host': 'instagram-downloader-scraper-reels-igtv-posts-stories.p.rapidapi.com' 
@@ -37,11 +79,48 @@
             });
             const data = await response.json();
             
-            // TAMPILKAN SEMUA ISI PERUTNYA
-            debugDiv.innerHTML = JSON.stringify(data, null, 2);
+            // --- LOGIKA PENCARIAN STORY & REELS ---
+            let htmlContent = "";
 
-        } catch (error) {
-            debugDiv.innerHTML = "Error: " + error.message;
+            if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+                // KASUS 1: STORY (Banyak item)
+                data.data.forEach((item, index) => {
+                    // Cek apakah item punya media (video/foto)
+                    if (item.media) {
+                        const tipe = item.isVideo ? "Video" : "Foto";
+                        const thumb = item.thumb || item.media; // Pakai gambar asli kalau gak ada thumb
+                        
+                        htmlContent += `
+                            <div class="story-item">
+                                <img src="${thumb}" class="story-thumb">
+                                <div>
+                                    <div style="font-weight:bold; font-size:12px;">Story #${index + 1} (${tipe})</div>
+                                    <a href="${item.media}" target="_blank" class="btn-dl-mini" download>Download</a>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            } 
+            else if (data.result && data.result[0] && data.result[0].url) {
+                // KASUS 2: REELS BIASA (Satu item)
+                const videoUrl = data.result[0].url;
+                htmlContent = `
+                    <div style="text-align:center;">
+                        <p style="color:green; font-weight:bold;">Video Reels Ditemukan!</p>
+                        <a href="${videoUrl}" target="_blank" class="btn-dl-mini" style="padding:15px 30px; font-size:16px;">Download MP4</a>
+                    </div>
+                `;
+            }
+
+            if(htmlContent) {
+                resultDiv.innerHTML = htmlContent;
+            } else {
+                resultDiv.innerHTML = `<p style="color:red; text-align:center;">Gagal. Pastikan akun publik atau link benar.</p>`;
+            }
+
+        } catch (error) { 
+            resultDiv.innerHTML = `<p style="color:red; text-align:center;">Error: ${error.message}</p>`; 
         }
     }
 </script>
