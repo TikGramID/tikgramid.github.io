@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TikGram ID - Download TikTok</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #000; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: white; }
         .container { background: #111; padding: 2.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(255,255,255,0.1); width: 100%; max-width: 400px; text-align: center; border: 1px solid #333; }
         h2 { color: #fff; margin-bottom: 5px; }
         span.tiktok-color { color: #fe2c55; text-shadow: 2px 2px 0px #25f4ee; }
@@ -13,44 +13,93 @@
         input { width: 90%; padding: 14px; margin-bottom: 20px; border: 1px solid #333; border-radius: 12px; font-size: 14px; background-color: #222; color: white; }
         button { width: 100%; padding: 14px; background-color: #fe2c55; color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; font-weight: bold; }
         button:hover { background-color: #e6254c; }
-        #result { margin-top: 25px; word-wrap: break-word; }
-        .btn-download { background: #25f4ee; color: black; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; margin-top: 10px; }
-        .home-btn { display: block; margin-bottom: 20px; text-decoration: none; color: #fff; font-weight: bold; font-size: 14px; }
+        
+        #result { margin-top: 25px; text-align: left; }
+        
+        .btn-download { background: #25f4ee; color: black; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; margin-top: 10px; width: 100%; box-sizing: border-box; text-align: center; }
+        
+        .photo-item {
+            background: #222;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #333;
+        }
+        .photo-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; margin-right: 10px; }
+        .btn-mini { background: #25f4ee; color: black; text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; }
+
+        .home-btn { display: block; margin-bottom: 20px; text-decoration: none; color: #fff; font-weight: bold; font-size: 14px; text-align: center;}
     </style>
 </head>
 <body>
 <div class="container">
     <a href="index.html" class="home-btn">⬅ Kembali ke Menu Utama</a>
     <h2>TikGram <span class="tiktok-color">ID</span></h2>
-    <p class="subtitle">TikTok Auto Downloader</p>
+    <p class="subtitle">TikTok Video & Photo Downloader</p>
     <br>
     <input type="text" id="urlInput" placeholder="Tempel Link TikTok..." />
-    <button onclick="downloadTikTok()">Download Otomatis</button>
+    <button onclick="downloadTikTok()">Download</button>
     <div id="result"></div>
 </div>
 <script>
     async function downloadTikTok() {
         const inputUrl = document.getElementById('urlInput').value;
         const resultDiv = document.getElementById('result');
+        
         if (!inputUrl) { alert("Harap masukkan link TikTok dulu!"); return; }
-        resultDiv.innerHTML = "Sedang mencari...";
+        resultDiv.innerHTML = "<p style='text-align:center; color:#888;'>Sedang mencari...</p>";
+        
         const apiKey = '7a8d839d0dmsh5e778a7aecdf8aep1e7922jsnca9a2ba4b602'; 
+        
         try {
             const response = await fetch(`https://tiktok-video-no-watermark2.p.rapidapi.com/?url=${inputUrl}&hd=1`, {
                 method: 'GET', headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'tiktok-video-no-watermark2.p.rapidapi.com' }
             });
             const data = await response.json();
-            if(data.data && data.data.play) { 
+            
+            let htmlContent = "";
+
+            // CEK 1: Apakah ini Slideshow Foto? (Ada 'images')
+            if (data.data && data.data.images && data.data.images.length > 0) {
+                htmlContent += `<p style="color:#25f4ee; text-align:center; font-weight:bold;">${data.data.images.length} Foto Ditemukan!</p>`;
+                
+                // Munculkan daftar semua foto
+                data.data.images.forEach((imgUrl, index) => {
+                    htmlContent += `
+                        <div class="photo-item">
+                            <div style="display:flex; align-items:center;">
+                                <img src="${imgUrl}" class="photo-thumb">
+                                <span style="font-size:12px;">Foto #${index + 1}</span>
+                            </div>
+                            <a href="${imgUrl}" target="_blank" class="btn-mini">Download</a>
+                        </div>
+                    `;
+                });
+            }
+            // CEK 2: Apakah ini Video Biasa? (Ada 'play')
+            else if (data.data && data.data.play) {
                 const videoUrl = data.data.play;
-                
-                // --- FITUR AUTO DOWNLOAD ---
-                resultDiv.innerHTML = `<p style="color:#25f4ee;">Video Ditemukan! Membuka otomatis...</p><a href="${videoUrl}" target="_blank" class="btn-download">Klik jika tidak terbuka</a>`;
-                
-                // Perintah membuka link otomatis
-                setTimeout(() => { window.location.href = videoUrl; }, 1000); 
-                
-            } else { resultDiv.innerHTML = `<p style="color:red;">Gagal. Link salah atau diprivate.</p>`; }
-        } catch (error) { resultDiv.innerHTML = `<p style="color:red;">Error sistem.</p>`; }
+                htmlContent = `
+                    <div style="text-align:center;">
+                        <p style="color:#25f4ee; font-weight:bold;">Video Ditemukan!</p>
+                        <a href="${videoUrl}" target="_blank" class="btn-download">Download MP4</a>
+                    </div>
+                `;
+                // Auto open untuk video
+                setTimeout(() => { window.location.href = videoUrl; }, 1500);
+            } 
+            else {
+                htmlContent = `<p style="color:red; text-align:center;">Gagal. Link tidak valid.</p>`;
+            }
+
+            resultDiv.innerHTML = htmlContent;
+
+        } catch (error) { 
+            resultDiv.innerHTML = `<p style="color:red; text-align:center;">Error sistem.</p>`; 
+        }
     }
 </script>
 </body>
