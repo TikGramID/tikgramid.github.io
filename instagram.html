@@ -24,22 +24,25 @@
             justify-content: space-between;
         }
         
+        /* --- BAGIAN INI SUDAH SAYA PERBESAR --- */
         .media-thumb {
-            width: 60px;
-            height: 60px;
+            width: 120px;   /* Ukuran Besar */
+            height: 120px;  /* Ukuran Besar */
             object-fit: cover;
-            border-radius: 8px;
-            margin-right: 10px;
-            background: #ddd; /* Warna dasar kalau loading */
+            border-radius: 10px;
+            margin-right: 15px;
+            background: #ddd;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+        /* -------------------------------------- */
         
         .btn-dl-mini {
             background: #0095f6;
             color: white;
             text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 12px;
+            padding: 10px 20px; /* Tombol juga saya besarkan dikit biar seimbang */
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: bold;
         }
 
@@ -64,9 +67,9 @@
 <script>
     // Fungsi bantuan untuk bikin link proxy gambar
     function getProxyImage(url) {
-        if (!url) return 'https://placehold.co/60x60?text=No+IMG';
-        // Kita pakai layanan wsrv.nl untuk mem-proxy gambar IG agar lolos CORS
-        return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=60&h=60&output=jpg`;
+        if (!url) return 'https://placehold.co/120x120?text=No+IMG';
+        // Request gambar ukuran 120x120 lewat jalur belakang
+        return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=120&h=120&output=jpg`;
     }
 
     async function downloadInstagram() {
@@ -94,15 +97,14 @@
                         let label = isStory ? `Story #${index + 1}` : `Slide #${index + 1}`;
                         label += item.isVideo ? " (Video)" : " (Foto)";
                         
-                        // Ambil link gambar asli, lalu bungkus pakai proxy
                         const rawThumb = item.thumb || item.media; 
                         const proxyThumb = getProxyImage(rawThumb);
                         
                         htmlContent += `
                             <div class="media-item">
-                                <img src="${proxyThumb}" class="media-thumb" onerror="this.src='https://placehold.co/60x60?text=Err'">
+                                <img src="${proxyThumb}" class="media-thumb" onerror="this.src='https://placehold.co/120x120?text=Err'">
                                 <div>
-                                    <div style="font-weight:bold; font-size:12px;">${label}</div>
+                                    <div style="font-weight:bold; font-size:14px; margin-bottom:5px;">${label}</div>
                                     <a href="${item.media}" target="_blank" class="btn-dl-mini" download>Download</a>
                                 </div>
                             </div>
@@ -118,15 +120,14 @@
                 
                 if (mediaUrl) {
                     const label = isVideo ? "Video Post" : "Foto Post";
-                    // Ambil link gambar asli, lalu bungkus pakai proxy
                     const rawThumb = item.cover || mediaUrl;
                     const proxyThumb = getProxyImage(rawThumb);
 
                     htmlContent += `
                         <div class="media-item">
-                            <img src="${proxyThumb}" class="media-thumb" onerror="this.src='https://placehold.co/60x60?text=Err'">
+                            <img src="${proxyThumb}" class="media-thumb" onerror="this.src='https://placehold.co/120x120?text=Err'">
                             <div>
-                                <div style="font-weight:bold; font-size:12px;">${label}</div>
+                                <div style="font-weight:bold; font-size:14px; margin-bottom:5px;">${label}</div>
                                 <a href="${mediaUrl}" target="_blank" class="btn-dl-mini" download>Download</a>
                             </div>
                         </div>
