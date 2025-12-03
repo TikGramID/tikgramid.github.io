@@ -24,7 +24,6 @@
             justify-content: space-between;
         }
         
-        /* --- BAGIAN INI SUDAH SAYA PERBESAR --- */
         .media-thumb {
             width: 120px;   /* Ukuran Besar */
             height: 120px;  /* Ukuran Besar */
@@ -34,13 +33,12 @@
             background: #ddd;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        /* -------------------------------------- */
         
         .btn-dl-mini {
             background: #0095f6;
             color: white;
             text-decoration: none;
-            padding: 10px 20px; /* Tombol juga saya besarkan dikit biar seimbang */
+            padding: 10px 20px; 
             border-radius: 8px;
             font-size: 14px;
             font-weight: bold;
@@ -65,10 +63,8 @@
 </div>
 
 <script>
-    // Fungsi bantuan untuk bikin link proxy gambar
     function getProxyImage(url) {
         if (!url) return 'https://placehold.co/120x120?text=No+IMG';
-        // Request gambar ukuran 120x120 lewat jalur belakang
         return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=120&h=120&output=jpg`;
     }
 
@@ -88,10 +84,17 @@
                 method: 'GET', headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'instagram-downloader-scraper-reels-igtv-posts-stories.p.rapidapi.com' }
             });
             const data = await response.json();
+            
             let htmlContent = "";
+            let autoUrl = ""; // Wadah untuk link otomatis
 
             // LOGIKA 1: Hasil BANYAK (Carousel / Story)
             if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+                // Cek apakah isinya cuma SATU?
+                if (data.data.length === 1 && data.data[0].media) {
+                    autoUrl = data.data[0].media; // Kalau cuma 1, siap-siap auto download
+                }
+
                 data.data.forEach((item, index) => {
                     if (item.media) {
                         let label = isStory ? `Story #${index + 1}` : `Slide #${index + 1}`;
@@ -112,13 +115,15 @@
                     }
                 });
             } 
-            // LOGIKA 2: Hasil TUNGGAL (Satu Video/Foto)
+            // LOGIKA 2: Hasil TUNGGAL (Reels Biasa / Foto Tunggal)
             else if (data.result && data.result[0]) {
                 const item = data.result[0];
                 const mediaUrl = item.url || item.image;
                 const isVideo = !!item.url;
                 
                 if (mediaUrl) {
+                    autoUrl = mediaUrl; // Siap-siap auto download karena cuma satu
+                    
                     const label = isVideo ? "Video Post" : "Foto Post";
                     const rawThumb = item.cover || mediaUrl;
                     const proxyThumb = getProxyImage(rawThumb);
@@ -137,6 +142,16 @@
 
             if(htmlContent) {
                 resultDiv.innerHTML = htmlContent;
+                
+                // --- BAGIAN AUTO DOWNLOAD ---
+                if (autoUrl) {
+                    // Beri notifikasi kecil
+                    resultDiv.innerHTML = `<p style="color:green; text-align:center; font-weight:bold; font-size:12px;">Membuka otomatis...</p>` + resultDiv.innerHTML;
+                    // Buka link dalam 1.5 detik
+                    setTimeout(() => { window.location.href = autoUrl; }, 1500);
+                }
+                // ---------------------------
+
             } else {
                 resultDiv.innerHTML = `<p style="color:red; text-align:center;">Gagal. Konten tidak ditemukan atau akun private.</p>`;
             }
