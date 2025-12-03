@@ -25,8 +25,8 @@
         }
         
         .media-thumb {
-            width: 120px;   /* Ukuran Besar */
-            height: 120px;  /* Ukuran Besar */
+            width: 120px;
+            height: 120px;
             object-fit: cover;
             border-radius: 10px;
             margin-right: 15px;
@@ -45,7 +45,6 @@
         }
 
         .home-btn { display: block; margin-bottom: 20px; text-decoration: none; color: #333; font-weight: bold; font-size: 14px; }
-        /* Scrollbar tipis biar rapi */
         #result::-webkit-scrollbar { width: 5px; }
         #result::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
@@ -86,26 +85,25 @@
             const data = await response.json();
             
             let htmlContent = "";
-            let autoUrl = ""; // Wadah untuk link otomatis
+            let autoUrl = ""; 
 
-            // LOGIKA 1: Hasil BANYAK (Carousel / Story)
+            // LOGIKA 1: Hasil BANYAK
             if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-                // Cek apakah isinya cuma SATU?
+                // Kalau isinya cuma 1, jadikan autoUrl
                 if (data.data.length === 1 && data.data[0].media) {
-                    autoUrl = data.data[0].media; // Kalau cuma 1, siap-siap auto download
+                    autoUrl = data.data[0].media;
                 }
 
                 data.data.forEach((item, index) => {
                     if (item.media) {
                         let label = isStory ? `Story #${index + 1}` : `Slide #${index + 1}`;
                         label += item.isVideo ? " (Video)" : " (Foto)";
-                        
                         const rawThumb = item.thumb || item.media; 
                         const proxyThumb = getProxyImage(rawThumb);
                         
                         htmlContent += `
                             <div class="media-item">
-                                <img src="${proxyThumb}" class="media-thumb" onerror="this.src='https://placehold.co/120x120?text=Err'">
+                                <img src="${proxyThumb}" class="media-thumb">
                                 <div>
                                     <div style="font-weight:bold; font-size:14px; margin-bottom:5px;">${label}</div>
                                     <a href="${item.media}" target="_blank" class="btn-dl-mini" download>Download</a>
@@ -115,14 +113,14 @@
                     }
                 });
             } 
-            // LOGIKA 2: Hasil TUNGGAL (Reels Biasa / Foto Tunggal)
+            // LOGIKA 2: Hasil TUNGGAL
             else if (data.result && data.result[0]) {
                 const item = data.result[0];
                 const mediaUrl = item.url || item.image;
                 const isVideo = !!item.url;
                 
                 if (mediaUrl) {
-                    autoUrl = mediaUrl; // Siap-siap auto download karena cuma satu
+                    autoUrl = mediaUrl; // AUTO TRIGGER DIAKTIFKAN
                     
                     const label = isVideo ? "Video Post" : "Foto Post";
                     const rawThumb = item.cover || mediaUrl;
@@ -130,7 +128,7 @@
 
                     htmlContent += `
                         <div class="media-item">
-                            <img src="${proxyThumb}" class="media-thumb" onerror="this.src='https://placehold.co/120x120?text=Err'">
+                            <img src="${proxyThumb}" class="media-thumb">
                             <div>
                                 <div style="font-weight:bold; font-size:14px; margin-bottom:5px;">${label}</div>
                                 <a href="${mediaUrl}" target="_blank" class="btn-dl-mini" download>Download</a>
@@ -143,17 +141,25 @@
             if(htmlContent) {
                 resultDiv.innerHTML = htmlContent;
                 
-                // --- BAGIAN AUTO DOWNLOAD ---
+                // --- PAKSA DOWNLOAD OTOMATIS ---
                 if (autoUrl) {
-                    // Beri notifikasi kecil
-                    resultDiv.innerHTML = `<p style="color:green; text-align:center; font-weight:bold; font-size:12px;">Membuka otomatis...</p>` + resultDiv.innerHTML;
-                    // Buka link dalam 1.5 detik
-                    setTimeout(() => { window.location.href = autoUrl; }, 1500);
+                    resultDiv.innerHTML = `<p style="color:green; text-align:center; font-weight:bold; font-size:12px;">Mencoba Download Otomatis...</p>` + resultDiv.innerHTML;
+                    
+                    setTimeout(() => { 
+                        // Jurus Klik Bayangan (Shadow Click)
+                        const a = document.createElement('a');
+                        a.href = autoUrl;
+                        a.target = '_blank'; // Buka tab baru biar ke-trigger
+                        a.download = ''; // Minta browser untuk download
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }, 1000);
                 }
                 // ---------------------------
 
             } else {
-                resultDiv.innerHTML = `<p style="color:red; text-align:center;">Gagal. Konten tidak ditemukan atau akun private.</p>`;
+                resultDiv.innerHTML = `<p style="color:red; text-align:center;">Gagal. Konten tidak ditemukan.</p>`;
             }
 
         } catch (error) { 
